@@ -1,0 +1,492 @@
+      
+  <div class="image-editor-container">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet"></link>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #333;
+            --text-color: #f0f0f0;
+            --bg-color: #121212;
+        }
+    .imog{
+      width:1024px;
+      height:600px;
+      display: inline-block;
+      align-items:center;
+      justify-content:space-between;
+      margin: 0;
+      padding:0px;
+    }    
+        .image-editor-container {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff!important;
+            color: blue;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        h2 {
+            margin-bottom: 25px;
+            color: blue;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .upload-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .upload-btn {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            background: var(--primary-color);
+            color: white!important ;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            margin-bottom: 15px;
+            border: none;
+        }
+        
+        .upload-btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        #upload {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .image-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+        
+        #image-container, #result-container {
+            width: 100%;
+            max-width: 400px;
+            min-height: 300px;
+            border: 2px dashed #444;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1e1e1e;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #image-container.empty::before {
+            content: "ستظهر الصورة هنا";
+            color: orange;
+            font-size: 16px;
+        }
+        
+        #result-container.empty::before {
+            content: "ستظهر النتيجة هنا بعد القص";
+            color: #666;
+            font-size: 16px;
+        }
+        
+        #image {
+            max-width: 100%;
+            max-height: 400px;
+            display: none;
+        }
+        
+        .controls {
+            margin: 25px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .slider-label {
+            min-width: 120px;
+            text-align: right;
+            font-weight: 500;
+        }
+        
+        .slider {
+            flex-grow: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: #444;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+        }
+        
+        .slider-value {
+            min-width: 30px;
+            text-align: center;
+            font-family: monospace;
+        }
+        
+        #result img {
+            max-width: 100%;
+            max-height: 400px;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .reset-btn {
+            background: #f44336;
+            margin-left: 10px;
+        }
+        
+        .reset-btn:hover {
+            background: #d32f2f;
+        }
+        
+        @media (max-width: 768px) {
+            .image-container {
+                flex-direction: column;
+            }
+            
+            #image-container, #result-container {
+                max-width: 100%;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+    
+    <h2>تعديل الصور باستخدام Cropper</h2>
+    
+    <!--قسم رفع الصورة-->
+    <div class="upload-section">
+        <button class="upload-btn">
+            اختر صورة
+            <input accept="image/*" id="upload" type="file" />
+        </button>
+        <small>يدعم الصور من نوع JPG, PNG, GIF</small>
+    </div>
+    
+    <!--عرض الصور-->
+    <div class="image-container">
+        <div class="empty" id="image-container">
+            <img id="image" />
+        </div>
+        <div class="empty" id="result-container">
+            <div id="result"></div>
+        </div>
+    </div>
+    
+    <!--أزرار التحكم الأساسية-->
+    <div class="action-buttons">
+        <button class="btn" disabled="" id="crop-btn" onclick="cropImage()">قص الصورة</button>
+        <button class="btn" disabled="" id="download-btn" onclick="downloadImage()">تحميل الصورة</button>
+        <button class="btn reset-btn" onclick="resetEditor()">إعادة تعيين</button>
+    </div>
+    
+    <!--عناصر التحكم في التعديلات-->
+    <div class="controls">
+        <div class="slider-container">
+            <div class="slider-group">
+                <span class="slider-label">السطوع:</span>
+                <input class="slider" id="brightness" max="2" oninput="updateSliderValue('brightness-value', this.value); adjustImage()" type="range" value="1" />
+                <span class="slider-value" id="brightness-value">1</span>
+            </div>
+        </div>
+        
+        <div class="slider-container">
+            <div class="slider-group">
+                <span class="slider-label">التباين:</span>
+                <input class="slider" id="contrast" max="2" oninput="updateSliderValue('contrast-value', this.value); adjustImage()" type="range" value="1" />
+                <span class="slider-value" id="contrast-value">1</span>
+            </div>
+        </div>
+        
+        <div class="slider-container">
+            <div class="slider-group">
+                <span class="slider-label">تدرج الألوان:</span>
+                <input class="slider" id="hue" max="360" oninput="updateSliderValue('hue-value', this.value); adjustImage()" type="range" value="0" />
+                <span class="slider-value" id="hue-value">0</span>
+            </div>
+        </div>
+        
+        <div class="slider-container">
+            <div class="slider-group">
+                <span class="slider-label">حواف دائرية:</span>
+                <input class="slider" id="borderRadius" max="50" oninput="updateSliderValue('borderRadius-value', this.value); adjustImage()" type="range" value="0" />
+                <span class="slider-value" id="borderRadius-value">0</span>
+            </div>
+        </div>
+        
+        <div class="slider-container">
+            <div class="slider-group">
+                <span class="slider-label">ظل الصندوق:</span>
+                <input class="slider" id="boxShadow" max="20" oninput="updateSliderValue('boxShadow-value', this.value); adjustImage()" type="range" value="0" />
+                <span class="slider-value" id="boxShadow-value">0</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let cropper;
+        let imageDataURL;
+        let originalImageDataURL;
+
+        const uploadInput = document.getElementById('upload');
+        const image = document.getElementById('image');
+        const result = document.getElementById('result');
+        const cropBtn = document.getElementById('crop-btn');
+        const downloadBtn = document.getElementById('download-btn');
+        const imageContainer = document.getElementById('image-container');
+        const resultContainer = document.getElementById('result-container');
+
+        // تحميل الصورة وإنشاء Cropper
+        uploadInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                // التحقق من نوع الملف
+                if (!file.type.match('image.*')) {
+                    alert('الرجاء اختيار ملف صورة فقط (JPG, PNG, GIF)');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    image.src = e.target.result;
+                    image.style.display = "block";
+                    imageContainer.classList.remove('empty');
+                    
+                    if (cropper) cropper.destroy();
+                    
+                    cropper = new Cropper(image, {
+                        aspectRatio: NaN, // حرية في تحديد النسبة
+                        viewMode: 1,
+                        autoCropArea: 0.8,
+                        responsive: true,
+                        restore: true,
+                        guides: true,
+                        center: true,
+                        highlight: true,
+                        cropBoxMovable: true,
+                        cropBoxResizable: true,
+                        toggleDragModeOnDblclick: false,
+                        zoomOnWheel: true,
+                        ready() {
+                            cropBtn.disabled = false;
+                        }
+                    });
+                    
+                    // حفظ نسخة أصلية للصورة
+                    originalImageDataURL = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // قص الصورة وعرض النتيجة
+        function cropImage() {
+            if (cropper) {
+                const croppedCanvas = cropper.getCroppedCanvas({
+                    maxWidth: 1920,
+                    maxHeight: 1080,
+                    fillColor: '#fff',
+                    imageSmoothingEnabled: true,
+                    imageSmoothingQuality: 'high'
+                });
+                
+                if (!croppedCanvas) {
+                    alert('حدث خطأ أثناء قص الصورة. الرجاء المحاولة مرة أخرى.');
+                    return;
+                }
+                
+                imageDataURL = croppedCanvas.toDataURL("image/jpeg", 0.92);
+                
+                result.innerHTML = `<img src="${imageDataURL}" alt="الصورة المعدلة" style="${getImageStyle()}">`;
+                resultContainer.classList.remove('empty');
+                downloadBtn.disabled = false;
+                
+                // حفظ في localStorage
+                try {
+                    localStorage.setItem('lastEditedImage', imageDataURL);
+                } catch (e) {
+                    console.warn('لا يمكن حفظ الصورة في localStorage بسبب محدودية المساحة');
+                }
+            } else {
+                alert("يرجى رفع صورة أولاً.");
+            }
+        }
+
+        // تطبيق التعديلات
+        function adjustImage() {
+            const resultImage = result.querySelector('img');
+            if (resultImage) {
+                resultImage.style.cssText = getImageStyle();
+            }
+        }
+
+        // إعداد التنسيقات بناءً على التعديلات
+        function getImageStyle() {
+            const brightness = document.getElementById('brightness').value;
+            const contrast = document.getElementById('contrast').value;
+            const hue = document.getElementById('hue').value;
+            const borderRadius = document.getElementById('borderRadius').value;
+            const boxShadow = document.getElementById('boxShadow').value;
+
+            return `
+                filter: brightness(${brightness}) contrast(${contrast}) hue-rotate(${hue}deg);
+                border-radius: ${borderRadius}px;
+                box-shadow: 0 0 ${boxShadow}px rgba(0, 255, 0, 0.5);
+                object-fit: contain;
+                max-width: 100%;
+                max-height: 400px;
+            `;
+        }
+
+        // تحميل الصورة المعدلة
+        function downloadImage() {
+            if (imageDataURL) {
+                const a = document.createElement('a');
+                a.href = imageDataURL;
+                a.download = `صورة-معدلة-${new Date().toISOString().slice(0, 10)}.jpg`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                // تتبع عملية التحميل (اختياري)
+                console.log('تم تحميل الصورة بنجاح');
+            } else {
+                alert("يرجى قص الصورة أولاً.");
+            }
+        }
+
+        // إعادة تعيين المحرر
+        function resetEditor() {
+            if (confirm('هل تريد إعادة تعيين كل التعديلات؟')) {
+                // إعادة تعيين العناصر المنزلقة
+                document.getElementById('brightness').value = 1;
+                document.getElementById('contrast').value = 1;
+                document.getElementById('hue').value = 0;
+                document.getElementById('borderRadius').value = 0;
+                document.getElementById('boxShadow').value = 0;
+                
+                // تحديث قيم العناصر المنزلقة
+                updateSliderValue('brightness-value', 1);
+                updateSliderValue('contrast-value', 1);
+                updateSliderValue('hue-value', 0);
+                updateSliderValue('borderRadius-value', 0);
+                updateSliderValue('boxShadow-value', 0);
+                
+                // إعادة تعيين الصورة الأصلية إذا كانت موجودة
+                if (originalImageDataURL) {
+                    image.src = originalImageDataURL;
+                    if (cropper) {
+                        cropper.reset();
+                        cropper.replace(originalImageDataURL);
+                    }
+                }
+                
+                // إعادة تعيين النتيجة
+                result.innerHTML = '';
+                resultContainer.classList.add('empty');
+                downloadBtn.disabled = true;
+                
+                // إعادة تعيين متغير الصورة
+                imageDataURL = null;
+            }
+        }
+
+        // تحديث قيم العناصر المنزلقة
+        function updateSliderValue(id, value) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = value;
+            }
+        }
+
+        // محاولة تحميل الصورة الأخيرة من localStorage عند التحميل
+        window.addEventListener('DOMContentLoaded', () => {
+            const lastImage = localStorage.getItem('lastEditedImage');
+            if (lastImage) {
+                if (confirm('هل تريد استعادة الصورة المحررة الأخيرة؟')) {
+                    result.innerHTML = `<img src="${lastImage}" alt="الصورة المعدلة" style="${getImageStyle()}">`;
+                    resultContainer.classList.remove('empty');
+                    imageDataURL = lastImage;
+                    downloadBtn.disabled = false;
+                }
+            }
+        });
+    </script>
+
+      </div>
+                                                                                                               
+    
+      
